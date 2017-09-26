@@ -14,6 +14,8 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class LoginWindow {
 
@@ -89,6 +91,12 @@ public class LoginWindow {
 		textPassword.setBounds(165, 208, 176, 21);
 		
 		Button btnLogin = new Button(shlLogin, SWT.NONE);
+		btnLogin.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+			}
+		});
 		btnLogin.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
 		btnLogin.setBounds(281, 243, 60, 22);
 		btnLogin.setText("Login");
