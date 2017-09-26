@@ -23,6 +23,7 @@ public class LoginWindow {
 	private Text textServer;
 	private Text textUser;
 	private Text textPassword;
+	private Text textPort;
 
 	/**
 	 * Launch the application.
@@ -66,10 +67,10 @@ public class LoginWindow {
 		lblDbConnection.setFont(SWTResourceManager.getFont("System", 20, SWT.NORMAL));
 		lblDbConnection.setText("DB - Connection");
 		
-		Label lblServer = new Label(shlLogin, SWT.NONE);
-		lblServer.setFont(SWTResourceManager.getFont("System", 14, SWT.NORMAL));
-		lblServer.setBounds(79, 136, 70, 20);
-		lblServer.setText("Server");
+		Label lblHost = new Label(shlLogin, SWT.NONE);
+		lblHost.setFont(SWTResourceManager.getFont("System", 14, SWT.NORMAL));
+		lblHost.setBounds(79, 136, 70, 20);
+		lblHost.setText("Hostname");
 		
 		Label lblUser = new Label(shlLogin, SWT.NONE);
 		lblUser.setText("Username");
@@ -100,6 +101,15 @@ public class LoginWindow {
 		btnLogin.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
 		btnLogin.setBounds(281, 243, 60, 22);
 		btnLogin.setText("Login");
+		
+		textPort = new Text(shlLogin, SWT.BORDER);
+		textPort.setBounds(347, 134, 30, 21);
+		
+		Label lblPort = new Label(shlLogin, SWT.NONE);
+		lblPort.setFont(SWTResourceManager.getFont("Courier", 5, SWT.NORMAL));
+		lblPort.setAlignment(SWT.CENTER);
+		lblPort.setBounds(347, 113, 30, 15);
+		lblPort.setText("Port");
 
 	}
 }

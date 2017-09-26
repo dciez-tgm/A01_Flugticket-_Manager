@@ -121,6 +121,13 @@ public class MainWindow {
 		ComboViewer comboViewer_3 = new ComboViewer(shlFlightPlanner, SWT.NONE);
 		Combo comboDestinationAirport = comboViewer_3.getCombo();
 		comboDestinationAirport.setBounds(238, 256, 200, 23);
+		
+		Label lblPassenger = new Label(shlFlightPlanner, SWT.NONE);
+		lblPassenger.setText("Passenger");
+		lblPassenger.setFont(SWTResourceManager.getFont("System", 17, SWT.NORMAL));
+		lblPassenger.setBounds(25, 297, 160, 35);
+		// Passenger Arguments:
+		// id(autoincrement), First Name, Last Name, Airline, Flight Number, Rownumber, Seatposition
 
 	}
 }
