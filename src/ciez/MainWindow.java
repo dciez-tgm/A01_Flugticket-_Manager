@@ -23,6 +23,7 @@ public class MainWindow {
 	 * Launch the application.
 	 * @param args
 	 */
+	/*
 	public static void main(String[] args) {
 		try {
 			MainWindow window = new MainWindow();
@@ -31,6 +32,7 @@ public class MainWindow {
 			e.printStackTrace();
 		}
 	}
+	*/
 
 	/**
 	 * Open the window.

@@ -1,6 +1,7 @@
 package ciez;
 
 import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.TabFolder;
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import java.sql.*;
 
 public class LoginWindow {
 
@@ -25,6 +27,10 @@ public class LoginWindow {
 	private Text textPassword;
 	private Text textPort;
 	private Text txtOutput;
+	
+	private static String name;
+	private static String user;
+	private static String pw;
 
 	/**
 	 * Launch the application.
@@ -37,6 +43,12 @@ public class LoginWindow {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		//Datenquelle erzeugen
+		DataSourceClass dc = new DataSourceClass();
+		ds.setServername(name);
+		ds.setUser(user);
+		ds.setPassword(pw);
 	}
 
 	/**
@@ -62,6 +74,8 @@ public class LoginWindow {
 		shlLogin.setSize(450, 350);
 		shlLogin.setText("Login");
 		shlLogin.setLayout(null);
+		
+		String errorMsg = "An error has occured";
 		
 		Label lblDbConnection = new Label(shlLogin, SWT.CENTER);
 		lblDbConnection.setBounds(110, 60, 210, 32);
@@ -100,24 +114,29 @@ public class LoginWindow {
 		
 		textPassword = new Text(shlLogin, SWT.BORDER | SWT.PASSWORD);
 		textPassword.setBounds(165, 208, 176, 21);
+				
+		txtOutput = new Text(shlLogin, SWT.READ_ONLY | SWT.RIGHT | SWT.MULTI);
+		txtOutput.setFont(SWTResourceManager.getFont("Courier", 10, SWT.NORMAL));
+		txtOutput.setBounds(73, 243, 202, 40);
+		txtOutput.setEnabled(false);
+		txtOutput.setText("");
 		
 		Button btnLogin = new Button(shlLogin, SWT.NONE);
 		btnLogin.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
+			public void widgetSelected(SelectionEvent e) {			
+				try {
+					MainWindow window = new MainWindow();
+					window.open();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+
 			}
 		});
 		btnLogin.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
 		btnLogin.setBounds(281, 243, 60, 22);
 		btnLogin.setText("Login");
-		
-		txtOutput = new Text(shlLogin, SWT.READ_ONLY | SWT.RIGHT | SWT.MULTI);
-		txtOutput.setText("");
-		txtOutput.setFont(SWTResourceManager.getFont("Courier", 10, SWT.NORMAL));
-		txtOutput.setBounds(73, 243, 202, 40);
-		txtOutput.setEnabled(false);
-		txtOutput.append("An error has occured"); 
 
 	}
 }
