@@ -20,10 +20,11 @@ import org.eclipse.swt.events.SelectionEvent;
 public class LoginWindow {
 
 	protected Shell shlLogin;
-	private Text textServer;
+	private Text textHost;
 	private Text textUser;
 	private Text textPassword;
 	private Text textPort;
+	private Text txtOutput;
 
 	/**
 	 * Launch the application.
@@ -82,8 +83,17 @@ public class LoginWindow {
 		lblPassword.setFont(SWTResourceManager.getFont("System", 14, SWT.NORMAL));
 		lblPassword.setBounds(79, 210, 70, 20);
 		
-		textServer = new Text(shlLogin, SWT.BORDER);
-		textServer.setBounds(165, 134, 176, 21);
+		Label lblPort = new Label(shlLogin, SWT.NONE);
+		lblPort.setFont(SWTResourceManager.getFont("Courier", 5, SWT.NORMAL));
+		lblPort.setAlignment(SWT.CENTER);
+		lblPort.setBounds(347, 113, 30, 15);
+		lblPort.setText("Port");
+		
+		textHost = new Text(shlLogin, SWT.BORDER);
+		textHost.setBounds(165, 134, 176, 21);
+		
+		textPort = new Text(shlLogin, SWT.BORDER);
+		textPort.setBounds(347, 134, 30, 21);
 		
 		textUser = new Text(shlLogin, SWT.BORDER);
 		textUser.setBounds(165, 171, 176, 21);
@@ -102,14 +112,12 @@ public class LoginWindow {
 		btnLogin.setBounds(281, 243, 60, 22);
 		btnLogin.setText("Login");
 		
-		textPort = new Text(shlLogin, SWT.BORDER);
-		textPort.setBounds(347, 134, 30, 21);
-		
-		Label lblPort = new Label(shlLogin, SWT.NONE);
-		lblPort.setFont(SWTResourceManager.getFont("Courier", 5, SWT.NORMAL));
-		lblPort.setAlignment(SWT.CENTER);
-		lblPort.setBounds(347, 113, 30, 15);
-		lblPort.setText("Port");
+		txtOutput = new Text(shlLogin, SWT.READ_ONLY | SWT.RIGHT | SWT.MULTI);
+		txtOutput.setText("");
+		txtOutput.setFont(SWTResourceManager.getFont("Courier", 10, SWT.NORMAL));
+		txtOutput.setBounds(73, 243, 202, 40);
+		txtOutput.setEnabled(false);
+		txtOutput.append("An error has occured"); 
 
 	}
 }
