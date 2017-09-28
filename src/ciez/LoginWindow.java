@@ -28,9 +28,52 @@ public class LoginWindow {
 	private Text textPort;
 	private Text txtOutput;
 	
-	private static String name;
-	private static String user;
-	private static String pw;
+	private static Connection conn = null;
+	
+	// Host name
+	private static String dbHost;
+	
+	// Port ... standard: 3306
+	private static String dbPort;
+	
+	// Database name: flightdata
+	private static String database = "flightdata";
+	
+	// Database user
+	private static String dbUser;
+	
+	// Database password
+	private static String dbPw;
+	
+	
+	private LoginWindow(){
+	    try {
+	    	 
+	        // Datenbanktreiber für ODBC Schnittstellen laden.
+	        // Für verschiedene ODBC-Datenbanken muss dieser Treiber
+	        // nur einmal geladen werden.
+	        Class.forName("com.mysql.jdbc.Driver");
+	   
+	        // Verbindung zur ODBC-Datenbank herstellen.
+	        // Es wird die JDBC-ODBC-Brücke verwendet.
+	        conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":"
+	            + dbPort + "/" + database + "?" + "user=" + dbUser + "&"
+	            + "password=" + dbPw);
+	      } catch (ClassNotFoundException e) {
+	        System.out.println("Couldnt find drivers");
+	      } catch (SQLException e) {
+	        System.out.println("An unexpected error occured");
+	      }		
+	}
+	
+	private static Connection getInstance(){
+		if(conn == null){
+			new LoginWindow();
+		}
+		return conn;
+	}
+	
+
 
 	/**
 	 * Launch the application.
@@ -44,11 +87,6 @@ public class LoginWindow {
 			e.printStackTrace();
 		}
 		
-		//Datenquelle erzeugen
-		DataSourceClass dc = new DataSourceClass();
-		ds.setServername(name);
-		ds.setUser(user);
-		ds.setPassword(pw);
 	}
 
 	/**
@@ -74,8 +112,6 @@ public class LoginWindow {
 		shlLogin.setSize(450, 350);
 		shlLogin.setText("Login");
 		shlLogin.setLayout(null);
-		
-		String errorMsg = "An error has occured";
 		
 		Label lblDbConnection = new Label(shlLogin, SWT.CENTER);
 		lblDbConnection.setBounds(110, 60, 210, 32);
@@ -107,7 +143,7 @@ public class LoginWindow {
 		textHost.setBounds(165, 134, 176, 21);
 		
 		textPort = new Text(shlLogin, SWT.BORDER);
-		textPort.setBounds(347, 134, 30, 21);
+		textPort.setBounds(347, 134, 36, 21);
 		
 		textUser = new Text(shlLogin, SWT.BORDER);
 		textUser.setBounds(165, 171, 176, 21);
@@ -115,23 +151,46 @@ public class LoginWindow {
 		textPassword = new Text(shlLogin, SWT.BORDER | SWT.PASSWORD);
 		textPassword.setBounds(165, 208, 176, 21);
 				
-		txtOutput = new Text(shlLogin, SWT.READ_ONLY | SWT.RIGHT | SWT.MULTI);
+		txtOutput = new Text(shlLogin, SWT.READ_ONLY | SWT.MULTI | SWT.WRAP);
 		txtOutput.setFont(SWTResourceManager.getFont("Courier", 10, SWT.NORMAL));
-		txtOutput.setBounds(73, 243, 202, 40);
+		txtOutput.setBounds(73, 243, 202, 58);
 		txtOutput.setEnabled(false);
 		txtOutput.setText("");
 		
 		Button btnLogin = new Button(shlLogin, SWT.NONE);
 		btnLogin.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {			
-				try {
-					MainWindow window = new MainWindow();
-					window.open();
-				} catch (Exception e1) {
-					e1.printStackTrace();
+			public void widgetSelected(SelectionEvent e) {
+				// Assigning the inputs to the variables
+				dbHost = textHost.getText();
+				dbPort = textPort.getText();
+				dbUser = textUser.getText();
+				dbPw = textPassword.getText();
+				
+				// Checking if all the text fields meet the requirements
+				if(dbHost == "" || dbPort == "" || dbUser == "" || dbPort == ""){
+					txtOutput.setText("At least one text-field is empty!");
+				}else{
+					// Checking if dbPort is a valid number
+					boolean valid = false;
+					do{
+						try {
+							int temp = Integer.parseInt(dbPort);
+						} catch(NumberFormatException e1) {
+							txtOutput.setText("Port must be a number!");
+							return;
+						}
+						valid = true;
+					}while(valid == false);
+					
+					try {
+						System.out.print("dbHost: " + dbHost);
+						MainWindow window = new MainWindow();
+						window.open();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}					
 				}
-
 			}
 		});
 		btnLogin.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));

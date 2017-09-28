@@ -51,6 +51,7 @@ public class MainWindow {
 
 	/**
 	 * Create contents of the window.
+	 * @wbp.parser.entryPoint
 	 */
 	protected void createContents() {
 		shlFlightPlanner = new Shell();
