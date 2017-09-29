@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import java.sql.*;
+import java.util.Properties;
 
 public class LoginWindow {
 
@@ -45,35 +46,6 @@ public class LoginWindow {
 	// Database password
 	private static String dbPw;
 	
-	
-	private LoginWindow(){
-	    try {
-	    	 
-	        // Datenbanktreiber für ODBC Schnittstellen laden.
-	        // Für verschiedene ODBC-Datenbanken muss dieser Treiber
-	        // nur einmal geladen werden.
-	        Class.forName("com.mysql.jdbc.Driver");
-	   
-	        // Verbindung zur ODBC-Datenbank herstellen.
-	        // Es wird die JDBC-ODBC-Brücke verwendet.
-	        conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":"
-	            + dbPort + "/" + database + "?" + "user=" + dbUser + "&"
-	            + "password=" + dbPw);
-	      } catch (ClassNotFoundException e) {
-	        System.out.println("Couldnt find drivers");
-	      } catch (SQLException e) {
-	        System.out.println("An unexpected error occured");
-	      }		
-	}
-	
-	private static Connection getInstance(){
-		if(conn == null){
-			new LoginWindow();
-		}
-		return conn;
-	}
-	
-
 
 	/**
 	 * Launch the application.
@@ -112,6 +84,7 @@ public class LoginWindow {
 		shlLogin.setSize(450, 350);
 		shlLogin.setText("Login");
 		shlLogin.setLayout(null);
+		
 		
 		Label lblDbConnection = new Label(shlLogin, SWT.CENTER);
 		lblDbConnection.setBounds(110, 60, 210, 32);
@@ -167,25 +140,37 @@ public class LoginWindow {
 				dbUser = textUser.getText();
 				dbPw = textPassword.getText();
 				
+				Properties properties = new Properties();
+				
 				// Checking if all the text fields meet the requirements
 				if(dbHost == "" || dbPort == "" || dbUser == "" || dbPort == ""){
 					txtOutput.setText("At least one text-field is empty!");
 				}else{
-					// Checking if dbPort is a valid number
 					boolean valid = false;
 					do{
+						// Checking if dbPort is a valid number
 						try {
 							int temp = Integer.parseInt(dbPort);
 						} catch(NumberFormatException e1) {
 							txtOutput.setText("Port must be a number!");
 							return;
 						}
+						
+						// Connecting to database
+						try {
+							connect(dbHost, dbPort, database, dbUser, dbPw);
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
 						valid = true;
 					}while(valid == false);
 					
+					// Opening MainWindow after all the requirements are met
+					txtOutput.setText("Connection successfully established!");
 					try {
-						System.out.print("dbHost: " + dbHost);
-						MainWindow window = new MainWindow();
+						MainWindow window = new MainWindow(conn);
 						window.open();
 					} catch (Exception e1) {
 						e1.printStackTrace();
@@ -198,4 +183,20 @@ public class LoginWindow {
 		btnLogin.setText("Login");
 
 	}
+	
+	
+	public void connect(String host, String port, String db, String user, String pw) throws Exception{
+
+	      if(conn != null) return;
+
+	      try {
+	          Class.forName("com.mysql.jdbc.Driver");
+	      } catch (ClassNotFoundException e) {
+	          throw new Exception("No database");
+	      }
+
+	      conn = DriverManager.getConnection(
+	        "jdbc:mysql://" + host +":"+port+"/"+db+"?autoReconnect=true&useSSL=false", user, pw); 
+	  }
+	
 }

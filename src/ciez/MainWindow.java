@@ -11,29 +11,31 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Button;
+import java.sql.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class MainWindow {
 
+	private static Connection conn;
+	
 	protected Shell shlFlightPlanner;
 	private Text txtOutput;
 	private Text txtFirstName;
 	private Text txtLastName;
 
-	/**
-	 * Launch the application.
-	 * @param args
-	 */
-	/*
-	public static void main(String[] args) {
-		try {
-			MainWindow window = new MainWindow();
-			window.open();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	
+	// Constructor; Creates a Connection Item
+	public MainWindow(Connection c){
+		this.conn = c;
 	}
-	*/
-
+	
+	// Creating different queries
+	private String originCountryQuery = "SELECT name FROM countries";
+	private String originAirportQuery = "";
+	private String destinationCountryQuery = "";
+	private String destinationAirportQuery = "";
+	
 	/**
 	 * Open the window.
 	 */
@@ -102,15 +104,8 @@ public class MainWindow {
 		ComboViewer comboViewerOriginCountry = new ComboViewer(shlFlightPlanner, SWT.DROP_DOWN | SWT.BORDER);
 		Combo comboOriginCountry = comboViewerOriginCountry.getCombo();
 		comboOriginCountry.setBounds(25, 185, 200, 23);
-		//comboOrigin.add(""); too add items to the dropdownlist
-		/*
-		for(int i=1; i<121; i++){
-			comboOriginCountry.add("Item " + i);
-		}
-		*/
-		for(int i=1; i<201; i++){
-			comboOriginCountry.add("Item " + i);
-		}
+		// Filling drop-down list with the country names
+		//fillDropDown(comboOriginCountry, originCountryQuery, "name");
 		
 		ComboViewer comboViewerDestinationCountry = new ComboViewer(shlFlightPlanner, SWT.DROP_DOWN | SWT.BORDER);
 		Combo comboDestinationCountry = comboViewerDestinationCountry.getCombo();
@@ -188,10 +183,48 @@ public class MainWindow {
 		comboSeat.setBounds(395, 373, 45, 23);
 		
 		Button btnSubmit = new Button(shlFlightPlanner, SWT.NONE);
+		btnSubmit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			  
+				
+			}
+		});
+		btnSubmit.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
 		btnSubmit.setBounds(363, 416, 75, 25);
 		btnSubmit.setText("Submit");
 		// Passenger Arguments:
 		// id(autoincrement), First Name, Last Name, Airline, Flight Number, Rownumber, Seatposition
 
 	}
+	
+	
+	/*
+	 * Fills a drop down box with the 
+	 * specified column-items from a particular query
+	 * 
+	 * @param list The drop-down list which will be filled
+	 * @param query A String containing a query
+	 * @param c A String containing the "result-column" 
+	 */
+	public static void fillDropDown(Combo list, String query, String c){
+		String column = c;
+		// Creating a Statement Object
+		Statement st;
+		try {
+			// Creating a result set
+			st = conn.createStatement();
+			ResultSet rs = st.executeQuery(query);
+			
+			// Iterating through result set
+			while (rs.next()) {
+				list.add(rs.getString(column));
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 }
