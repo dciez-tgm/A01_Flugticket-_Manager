@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Button;
 import java.sql.*;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainWindow {
 
@@ -23,6 +25,12 @@ public class MainWindow {
 	private Text txtOutput;
 	private Text txtFirstName;
 	private Text txtLastName;
+	
+
+	private String originCountry = "";
+	private String destinationCountry = "";
+	private String originAirport = "";
+	private String destinationAirport = "";
 
 	
 	// Constructor; Creates a Connection Item
@@ -30,11 +38,8 @@ public class MainWindow {
 		this.conn = c;
 	}
 	
-	// Creating different queries
-	private String originCountryQuery = "SELECT name FROM countries";
-	private String originAirportQuery = "";
-	private String destinationCountryQuery = "";
-	private String destinationAirportQuery = "";
+	
+	private HashMap<String, String> countries;
 	
 	/**
 	 * Open the window.
@@ -57,22 +62,17 @@ public class MainWindow {
 	 */
 	protected void createContents() {
 		shlFlightPlanner = new Shell();
-		shlFlightPlanner.setSize(750, 515);
+		shlFlightPlanner.setSize(830, 515);
 		shlFlightPlanner.setText("Flight Planner\r\n");
+		
 		txtOutput = new Text(shlFlightPlanner, SWT.BORDER | SWT.MULTI); //SWT.MULTI for multiple line output
 		txtOutput.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
 		txtOutput.setEditable(false);
 		txtOutput.setEnabled(false);
-		txtOutput.setText("Flight Information:" + "\n");
+		txtOutput.setText("Flight Information:");
 		txtOutput.setFont(SWTResourceManager.getFont("Courier", 10, SWT.NORMAL));
-		txtOutput.setBounds(480, 160, 225, 280);
-		//tOutput.append(""); to add text
-		txtOutput.append("---   Origin    ---" + "\n");
-		txtOutput.append("Country: " + "\n");
-		txtOutput.append("Airport: " + "\n");
-		txtOutput.append("--- Destination ---" + "\n");
-		txtOutput.append("Country: " + "\n");
-		txtOutput.append("Airport: " + "\n");
+		txtOutput.setBounds(504, 160, 265, 280);
+		refreshOutput(txtOutput, "", "", "", "");
 		txtOutput.setVisible(true);
 
 		
@@ -104,12 +104,14 @@ public class MainWindow {
 		ComboViewer comboViewerOriginCountry = new ComboViewer(shlFlightPlanner, SWT.DROP_DOWN | SWT.BORDER);
 		Combo comboOriginCountry = comboViewerOriginCountry.getCombo();
 		comboOriginCountry.setBounds(25, 185, 200, 23);
-		// Filling drop-down list with the country names
-		//fillDropDown(comboOriginCountry, originCountryQuery, "name");
 		
 		ComboViewer comboViewerDestinationCountry = new ComboViewer(shlFlightPlanner, SWT.DROP_DOWN | SWT.BORDER);
 		Combo comboDestinationCountry = comboViewerDestinationCountry.getCombo();
 		comboDestinationCountry.setBounds(238, 185, 200, 23);
+		
+		// Filling drop-down lists with the country names
+		fillCountries(comboOriginCountry);
+		fillCountries(comboDestinationCountry);
 		
 		Label lblAirportOrigin = new Label(shlFlightPlanner, SWT.NONE);
 		lblAirportOrigin.setText("Airport");
@@ -181,6 +183,14 @@ public class MainWindow {
 		ComboViewer comboViewerSeat = new ComboViewer(shlFlightPlanner, SWT.NONE);
 		Combo comboSeat = comboViewerSeat.getCombo();
 		comboSeat.setBounds(395, 373, 45, 23);
+
+		
+		
+		
+
+		
+		
+		
 		
 		Button btnSubmit = new Button(shlFlightPlanner, SWT.NONE);
 		btnSubmit.addSelectionListener(new SelectionAdapter() {
@@ -193,9 +203,53 @@ public class MainWindow {
 		btnSubmit.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
 		btnSubmit.setBounds(363, 416, 75, 25);
 		btnSubmit.setText("Submit");
+		
+			
+		Button btnLockCountires = new Button(shlFlightPlanner, SWT.NONE);
+		btnLockCountires.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				// The "old" airports are being deleted in case a new airport is locked in 
+				// The "country" input is received and afterwards the country-code
+				comboOriginAirport.removeAll();
+				originCountry = comboOriginCountry.getText();
+				String originCode = getCode(originCountry);
+				// Filling the airport drop-down list
+				fillAirports(comboOriginAirport, originCode);
+				
+				// Same as above
+				comboDestinationAirport.removeAll();
+				destinationCountry = comboDestinationCountry.getText();
+				String destinationCode = getCode(destinationCountry);
+				fillAirports(comboDestinationAirport, destinationCode);
+				
+				// Adding selected countries to preview/output window
+				refreshOutput(txtOutput, originCountry, destinationCountry, "", "");
+			}
+		});
+		btnLockCountires.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
+		btnLockCountires.setBounds(447, 183, 51, 25);
+		btnLockCountires.setText("Lock");
+		
+		Button btnLockAirports = new Button(shlFlightPlanner, SWT.NONE);
+		btnLockAirports.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				// Get selected airport and city text
+				originAirport = comboOriginAirport.getText();
+				destinationAirport = comboDestinationAirport.getText();
+				refreshOutput(txtOutput, originCountry, destinationCountry, originAirport, destinationAirport);
+			}
+		});
+		btnLockAirports.setText("Lock");
+		btnLockAirports.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
+		btnLockAirports.setBounds(447, 254, 51, 25);
 		// Passenger Arguments:
 		// id(autoincrement), First Name, Last Name, Airline, Flight Number, Rownumber, Seatposition
 
+		
 	}
 	
 	
@@ -205,25 +259,84 @@ public class MainWindow {
 	 * 
 	 * @param list The drop-down list which will be filled
 	 * @param query A String containing a query
-	 * @param c A String containing the "result-column" 
 	 */
-	public static void fillDropDown(Combo list, String query, String c){
-		String column = c;
-		// Creating a Statement Object
+	public static void fillCountries(Combo list){
+		// Creating a Statement object
 		Statement st;
 		try {
 			// Creating a result set
 			st = conn.createStatement();
-			ResultSet rs = st.executeQuery(query);
+			ResultSet rs = st.executeQuery("SELECT name FROM countries");
 			
 			// Iterating through result set
-			while (rs.next()) {
-				list.add(rs.getString(column));
+			while (rs.next()) {	
+				list.add(rs.getString("name"));
 			}
 			
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	
+	public static String getCode(String country){
+		// Creating a Statement object
+		Statement st;
+		try {
+			// Creating a result set
+			st = conn.createStatement();
+			ResultSet rs = st.executeQuery("SELECT code FROM countries WHERE name='" + country + "'");
+			
+			String code;
+			// Iterating through result set
+			while (rs.next()) {
+				code = rs.getString("code");
+				return code;
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
+	
+	public static void fillAirports(Combo list, String code){
+		// Creating a Statement object
+		Statement st;
+		try {
+			// Creating a result set
+			st = conn.createStatement();
+			ResultSet rs = st.executeQuery("SELECT name, city FROM airports WHERE country='" + code + "'");
+			
+			
+			String airport;
+			String city;
+			// Iterating through result set
+			while (rs.next()) {
+				airport = rs.getString("name");
+				city = rs.getString("city");
+				String result = airport + ", " + city;
+				list.add(result);
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 * This function "refreshes" the output window
+	 * @param t The textfield
+	 * @param oC origin country
+	 * @param dC destination country
+	 * @param oA origin airport
+	 * @param dA destination airport
+	 */
+	public static void refreshOutput(Text t, String oC, String dC, String oA, String dA){
+		t.setText("-FLIGHT INFORMATION-\n\n --- Origin\nCountry: " + oC + "\nAirport: " + oA + "\n\n--- Destination" + "\nCountry: " + dC +"\nAirport: " + dA + "\n\n");
+
 	}
 	
 	
