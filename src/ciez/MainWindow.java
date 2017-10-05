@@ -5,6 +5,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.SWT;
 import org.eclipse.wb.swt.SWTResourceManager;
+
+import com.mysql.jdbc.UpdatableResultSet;
+
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Combo;
@@ -28,16 +31,21 @@ public class MainWindow {
 	private Text txtLastName;
 	
 
-	private String originCountry;
-	private String destinationCountry;
-	private String originAirport;
-	private String destinationAirport;
-	private String originCountryCode;
-	private String destinationCountryCode;
-	private String originAirportCode;
-	private String destinationAirportCode;
-	private String[] flights;
+	private String originCountry = "";
+	private String destinationCountry = "";
+	private String originAirport = "";
+	private String destinationAirport = "";
+	private String originCountryCode = "";
+	private String destinationCountryCode = "";
+	private String originAirportCode = "";
+	private String destinationAirportCode = "";
+	private String airline = "";
 	
+	private String name = "";
+	
+	private String flightNr = "";
+	private String depTime = "";
+	private String desTime = "";
 	
 	// Constructor; Creates a Connection Item
 	public MainWindow(Connection c){
@@ -68,7 +76,7 @@ public class MainWindow {
 	 */
 	protected void createContents() {
 		shlFlightPlanner = new Shell();
-		shlFlightPlanner.setSize(1000, 600);
+		shlFlightPlanner.setSize(1000, 625);
 		shlFlightPlanner.setText("Flight Planner\r\n");
 		
 		txtOutput = new Text(shlFlightPlanner, SWT.BORDER | SWT.MULTI); //SWT.MULTI for multiple line output
@@ -77,10 +85,14 @@ public class MainWindow {
 		txtOutput.setEnabled(false);
 		txtOutput.setText("Flight Information:");
 		txtOutput.setFont(SWTResourceManager.getFont("Courier", 10, SWT.NORMAL));
-		txtOutput.setBounds(523, 160, 451, 373);
-		refreshOutput(txtOutput, "", "", "", "");
+		txtOutput.setBounds(523, 151, 451, 425);
+		refreshOutput(txtOutput, "", "", "", "", "", "", "", "", "");
 		txtOutput.setVisible(true);
 
+		
+		/*
+		 * ---------------------------------------- WINDOWBUILDER GENERATED GUI  ELEMENTS ----------------------------------------
+		 */
 		
 		Label lblTickts = new Label(shlFlightPlanner, SWT.NONE);
 		lblTickts.setFont(SWTResourceManager.getFont("System", 30, SWT.NORMAL));
@@ -89,13 +101,13 @@ public class MainWindow {
 		
 		Label lblOrigin = new Label(shlFlightPlanner, SWT.NONE);
 		lblOrigin.setFont(SWTResourceManager.getFont("System", 17, SWT.NORMAL));
-		lblOrigin.setBounds(25, 120, 110, 35);
+		lblOrigin.setBounds(25, 116, 110, 35);
 		lblOrigin.setText("Origin");
 		
 		Label lblDestination = new Label(shlFlightPlanner, SWT.NONE);
 		lblDestination.setText("Destination");
 		lblDestination.setFont(SWTResourceManager.getFont("System", 17, SWT.NORMAL));
-		lblDestination.setBounds(238, 120, 160, 35);
+		lblDestination.setBounds(238, 116, 160, 35);
 		
 		Label lblCountryOrigin = new Label(shlFlightPlanner, SWT.NONE);
 		lblCountryOrigin.setFont(SWTResourceManager.getFont("Courier", 12, SWT.NORMAL));
@@ -145,7 +157,7 @@ public class MainWindow {
 		Label lblPassenger = new Label(shlFlightPlanner, SWT.NONE);
 		lblPassenger.setText("Passenger");
 		lblPassenger.setFont(SWTResourceManager.getFont("System", 17, SWT.NORMAL));
-		lblPassenger.setBounds(25, 390, 160, 35);
+		lblPassenger.setBounds(25, 384, 160, 35);
 		
 		Label lblFirstName = new Label(shlFlightPlanner, SWT.NONE);
 		lblFirstName.setAlignment(SWT.RIGHT);
@@ -160,20 +172,21 @@ public class MainWindow {
 		lblLastName.setBounds(25, 469, 94, 20);
 		
 		txtFirstName = new Text(shlFlightPlanner, SWT.BORDER);
-		txtFirstName.setBounds(125, 442, 100, 21);
+		txtFirstName.setBounds(125, 442, 191, 21);
 		
 		txtLastName = new Text(shlFlightPlanner, SWT.BORDER);
-		txtLastName.setBounds(125, 469, 100, 21);
+		txtLastName.setBounds(125, 469, 191, 21);
 		
 		Label lblAirline = new Label(shlFlightPlanner, SWT.NONE);
-		lblAirline.setAlignment(SWT.CENTER);
+		lblAirline.setAlignment(SWT.RIGHT);
 		lblAirline.setFont(SWTResourceManager.getFont("Courier", 12, SWT.NORMAL));
-		lblAirline.setBounds(238, 443, 100, 20);
+		lblAirline.setBounds(25, 498, 94, 20);
 		lblAirline.setText("Airline");
 		
 		ComboViewer comboViewerAirline = new ComboViewer(shlFlightPlanner, SWT.NONE);
 		Combo comboAirline = comboViewerAirline.getCombo();
-		comboAirline.setBounds(238, 468, 100, 23);
+		comboAirline.setBounds(125, 496, 305, 23);
+		airline = comboAirline.getText();
 		
 		// Filling drop-down list with the airline names
 		fillAirlines(comboAirline);
@@ -181,45 +194,67 @@ public class MainWindow {
 		Label lblRow = new Label(shlFlightPlanner, SWT.NONE);
 		lblRow.setFont(SWTResourceManager.getFont("Courier", 12, SWT.NORMAL));
 		lblRow.setAlignment(SWT.RIGHT);
-		lblRow.setBounds(344, 443, 45, 20);
+		lblRow.setBounds(322, 442, 45, 20);
 		lblRow.setText("Row");
 		
 		Label lblSeat = new Label(shlFlightPlanner, SWT.NONE);
 		lblSeat.setText("Seat");
 		lblSeat.setFont(SWTResourceManager.getFont("Courier", 12, SWT.NORMAL));
 		lblSeat.setAlignment(SWT.RIGHT);
-		lblSeat.setBounds(344, 469, 45, 20);
+		lblSeat.setBounds(322, 468, 45, 20);
 		
 		ComboViewer comboViewerRow = new ComboViewer(shlFlightPlanner, SWT.NONE);
 		Combo comboRow = comboViewerRow.getCombo();
-		comboRow.setBounds(395, 440, 45, 23);
+		comboRow.setBounds(373, 440, 57, 23);
 		
 		ComboViewer comboViewerSeat = new ComboViewer(shlFlightPlanner, SWT.NONE);
 		Combo comboSeat = comboViewerSeat.getCombo();
-		comboSeat.setBounds(395, 466, 45, 23);
+		comboSeat.setBounds(373, 466, 57, 23);
 
-		
-		
-		
-
-		
-		
-		
-		
 		Button btnSubmit = new Button(shlFlightPlanner, SWT.NONE);
-		btnSubmit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			  
-				
-			}
-		});
 		btnSubmit.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
-		btnSubmit.setBounds(447, 508, 70, 25);
+		btnSubmit.setBounds(436, 494, 81, 25);
 		btnSubmit.setText("Submit");
 		
-			
 		Button btnLockCountires = new Button(shlFlightPlanner, SWT.NONE);
+		btnLockCountires.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
+		btnLockCountires.setBounds(447, 183, 70, 25);
+		btnLockCountires.setText("Lock");
+		
+		Button btnLockAirports = new Button(shlFlightPlanner, SWT.NONE);
+		btnLockAirports.setText("Lock");
+		btnLockAirports.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
+		btnLockAirports.setBounds(447, 254, 70, 25);
+		
+		Button btnResetAll = new Button(shlFlightPlanner, SWT.NONE);
+		btnResetAll.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
+		btnResetAll.setBounds(436, 465, 81, 25);
+		btnResetAll.setText("Reset All");
+		
+		Button btnBuy = new Button(shlFlightPlanner, SWT.NONE);
+		btnBuy.setText("Buy Ticket");
+		btnBuy.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
+		btnBuy.setBounds(436, 551, 81, 25);
+		
+		Label label = new Label(shlFlightPlanner, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setBounds(25, 535, 492, 2);
+		
+		Label label_1 = new Label(shlFlightPlanner, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label_1.setBounds(25, 422, 492, 2);
+		
+		Label label_2 = new Label(shlFlightPlanner, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label_2.setBounds(25, 151, 492, 2);
+		
+		
+		// Passenger Arguments:
+		// id(autoincrement), First Name, Last Name, Airline, Flight Number, Rownumber, Seatposition
+
+		
+		/*
+		 * ---------------------------------------- ACTION LISTENER ----------------------------------------
+		 */
+		
+		
 		btnLockCountires.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -238,16 +273,15 @@ public class MainWindow {
 				destinationCountryCode = getCountryCode(destinationCountry);
 				fillAirports(comboDestinationAirport, destinationCountryCode);
 				
+				// Clearing the list
+				flightlist.removeAll();
+				
 				// Adding selected countries to preview/output window
-				refreshOutput(txtOutput, originCountry, destinationCountry, "", "");
+				refreshOutput(txtOutput, originCountry, destinationCountry, "", "", "", "", "", "", "");
 			}
 		});
-		btnLockCountires.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
-		btnLockCountires.setBounds(447, 183, 70, 25);
-		btnLockCountires.setText("Lock");
 		
 		
-		Button btnLockAirports = new Button(shlFlightPlanner, SWT.NONE);
 		btnLockAirports.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -261,18 +295,37 @@ public class MainWindow {
 				String[] tempDestinationSplit = destinationAirport.split(",");
 				destinationAirportCode = getAirportCode(tempDestinationSplit[0]);
 				
+				// Clearing the list
+				flightlist.removeAll();
+				
 				// Check if there are any available flights (if so, fill the list)
-				checkFlights(flightlist, originAirportCode, destinationAirportCode);
+				checkFlights(flightlist, originAirportCode, destinationAirportCode, comboAirline);
+				airline = comboAirline.getText();
 				
 				// Adding selected countries to preview/output window
-				refreshOutput(txtOutput, originCountry, destinationCountry, originAirport, destinationAirport);
+				refreshOutput(txtOutput, originCountry, destinationCountry, originAirport, destinationAirport, "", "", airline, "", "");
 			}
 		});
-		btnLockAirports.setText("Lock");
-		btnLockAirports.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
-		btnLockAirports.setBounds(447, 254, 70, 25);
 		
-		Button btnResetAll = new Button(shlFlightPlanner, SWT.NONE);
+		
+		flightlist.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+		        int index = flightlist.getSelectionIndex();
+		        String selection = flightlist.getItem(index);
+		        if(selection != "Currently there are no flights in the system"){
+		        	String[] split = selection.split("\\[|\\]");
+		        	flightNr = split[1];
+		        	depTime = split[3];
+		        	desTime = split[5];
+		        	refreshOutput(txtOutput, originCountry, destinationCountry, originAirport, destinationAirport, name, flightNr, airline, depTime, desTime);
+		        }
+		        
+			}
+		});
+		
+		
 		btnResetAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -285,17 +338,38 @@ public class MainWindow {
 				flightlist.removeAll();
 				comboAirline.deselectAll();
 				
-				refreshOutput(txtOutput, "", "", "", "");
+				refreshOutput(txtOutput, "", "", "", "", "", "", "", "", "");
 			}
 		});
-		btnResetAll.setFont(SWTResourceManager.getFont("System", 9, SWT.NORMAL));
-		btnResetAll.setBounds(357, 508, 81, 25);
-		btnResetAll.setText("Reset All");
-		// Passenger Arguments:
-		// id(autoincrement), First Name, Last Name, Airline, Flight Number, Rownumber, Seatposition
-
 		
+		
+		btnSubmit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			  
+				
+			}
+		});
+		
+		
+		btnBuy.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				
+			}
+		});
+		
+		
+		/*
+		 * ---------------------------------------- END OF ACTION LISTENERS ----------------------------------------
+		 */
 	}
+	
+	
+	/*
+	 *  ---------------------------------------- FUNCTIONS ----------------------------------------
+	 */
 	
 	
 	/*
@@ -466,13 +540,14 @@ public class MainWindow {
 	 * @param list The list which will be filled
 	 * @param air1 The first airport
 	 * @param air2 The second airport
+	 * @param combo The airlines drop-down list, in case there is an available flight
 	 */
-	public static void checkFlights(List list, String air1, String air2){
+	public static void checkFlights(List list, String air1, String air2, Combo combo){
 		// Creating Statement objects
 		Statement st1;
 		Statement st2;
 		try {
-			// Creating a result set
+			// Creating result sets
 			st1 = conn.createStatement();
 			st2 = conn.createStatement();
 			ResultSet rs1 = st1.executeQuery("SELECT * FROM flights WHERE departure_airport='" + air1 + "' AND destination_airport='" + air2 + "'");
@@ -491,20 +566,23 @@ public class MainWindow {
 			
 			String airline;
 			String flightnr;
-			if (rs1.next() == false) {
-				list.add("Currently there are no flights in the system.");
-			}
 			// Iterating through the first result set
 			while (rs1.next()) {	
 				String temp = rs1.getString("airline");
 				airline = getAirline(temp);
 				flightnr = rs1.getString("flightnr");
 				
-				list.add(airline + " NR: " + flightnr 
-						+ " - DEP: " + airports[0] + " " + convertDate(rs1.getString("departure_time"))
-						+ " --- DES: " + airports[1] + " " + convertDate(rs1.getString("destination_time")));
+				list.add(airline + " NR: [" + flightnr 
+						+ "] - DEP: " + airports[0] + " [" + convertDate(rs1.getString("departure_time"))
+						+ "] --- DES: " + airports[1] + " [" + convertDate(rs1.getString("destination_time")) + "]");
+				
+				// Selecting the airline in the airline drop-down list
+				combo.select(combo.indexOf(airline));
 			}
 			
+			if(list.getItemCount() == 0 ) {
+				list.add("Currently there are no flights in the system");
+			}
 			
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -530,18 +608,24 @@ public class MainWindow {
 	 * @param dC destination country
 	 * @param oA origin airport
 	 * @param dA destination airport
+	 * @param name passenger name
+	 * @param nr flight number
+	 * @param airL airline
+	 * @param depT departure time
+	 * @param desT destination time
 	 */
-	public static void refreshOutput(Text t, String oC, String dC, String oA, String dA){
+	public static void refreshOutput(Text t, String oC, String dC, String oA, String dA, String name, String nr, String airL, String depT, String desT){
 		t.setText("_________________ FLIGHT INFORMATION _________________\n\n\n\n\n"
-				+ "--- Origin\n\nCountry: " + oC 
-				+ "\nAirport: " + oA 
-				+ "\n\n\n--- Destination\n\nCountry: " + dC 
-				+"\nAirport: " + dA 
-				+ "\n\n\n--- Flight\n\nBooked for: "
-				+ "\nNr.: " + "Airline:" 
-				+ "\nDeparture: " 
-				+ "\nDestiantion: " 
-				+ "\nAirplane: ");
+				+ "--- Origin\n\nCountry:       " + oC 
+				+ "\nAirport:       " + oA 
+				+ "\n\n\n--- Destination\n\nCountry:       " + dC 
+				+"\nAirport:       " + dA 
+				+ "\n\n\n--- Flight\n\nBooked for:    " + name
+				+ "\nNr.:           " + nr 
+				+ "\nAirline:       " + airL
+				+ "\nDeparture:     " + depT
+				+ "\nDestiantion:   " + desT
+				+ "\nAirplane:      Paperplane");
 
 	}
 	
