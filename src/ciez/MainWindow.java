@@ -299,11 +299,11 @@ public class MainWindow {
 				flightlist.removeAll();
 				
 				// Check if there are any available flights (if so, fill the list)
-				checkFlights(flightlist, originAirportCode, destinationAirportCode, comboAirline);
-				airline = comboAirline.getText();
+				airline = checkFlights(flightlist, originAirportCode, destinationAirportCode, comboAirline);
+
 				
 				// Adding selected countries to preview/output window
-				refreshOutput(txtOutput, originCountry, destinationCountry, originAirport, destinationAirport, "", "", airline, "", "");
+				refreshOutput(txtOutput, originCountry, destinationCountry, originAirport, destinationAirport, "", "", "", "", "");
 			}
 		});
 		
@@ -311,6 +311,9 @@ public class MainWindow {
 		flightlist.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				// Selecting the airline in the airline drop-down list
+				comboAirline.select(comboAirline.indexOf(airline));
 				
 		        int index = flightlist.getSelectionIndex();
 		        String selection = flightlist.getItem(index);
@@ -542,7 +545,7 @@ public class MainWindow {
 	 * @param air2 The second airport
 	 * @param combo The airlines drop-down list, in case there is an available flight
 	 */
-	public static void checkFlights(List list, String air1, String air2, Combo combo){
+	public static String checkFlights(List list, String air1, String air2, Combo combo){
 		// Creating Statement objects
 		Statement st1;
 		Statement st2;
@@ -564,8 +567,8 @@ public class MainWindow {
 			}
 			
 			
-			String airline;
-			String flightnr;
+			String airline = "";
+			String flightnr = "";
 			// Iterating through the first result set
 			while (rs1.next()) {	
 				String temp = rs1.getString("airline");
@@ -575,18 +578,19 @@ public class MainWindow {
 				list.add(airline + " NR: [" + flightnr 
 						+ "] - DEP: " + airports[0] + " [" + convertDate(rs1.getString("departure_time"))
 						+ "] --- DES: " + airports[1] + " [" + convertDate(rs1.getString("destination_time")) + "]");
-				
-				// Selecting the airline in the airline drop-down list
-				combo.select(combo.indexOf(airline));
 			}
 			
 			if(list.getItemCount() == 0 ) {
 				list.add("Currently there are no flights in the system");
 			}
 			
+			return airline;
+			
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return "";
 	}
 	
 	/*
