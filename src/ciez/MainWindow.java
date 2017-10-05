@@ -276,10 +276,14 @@ public class MainWindow {
 		btnResetAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
 				comboOriginCountry.deselectAll();
 				comboOriginAirport.removeAll();
 				comboDestinationCountry.deselectAll();
 				comboDestinationAirport.removeAll();
+				
+				flightlist.removeAll();
+				comboAirline.deselectAll();
 				
 				refreshOutput(txtOutput, "", "", "", "");
 			}
@@ -406,6 +410,33 @@ public class MainWindow {
 	
 	
 	/*
+	 * This function returns the airline
+	 * 
+	 * @param code Specifies which airline is returned
+	 */
+	public static String getAirline(String code){
+		// Creating a Statement object
+		Statement st;
+		try {
+			// Creating a result set
+			st = conn.createStatement();
+			ResultSet rs = st.executeQuery("SELECT name FROM airlines WHERE id='" + code + "'");
+			
+			String airline;
+			// Iterating through result set
+			while (rs.next()) {
+				airline = rs.getString("name");
+				return airline;
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
+	
+	/*
 	 * This function fills the airport drop-down list
 	 * 
 	 * @param combo Specifies the drop-down list
@@ -460,14 +491,18 @@ public class MainWindow {
 			
 			String airline;
 			String flightnr;
+			if (rs1.next() == false) {
+				list.add("Currently there are no flights in the system.");
+			}
 			// Iterating through the first result set
 			while (rs1.next()) {	
-				airline = rs1.getString("airline");
+				String temp = rs1.getString("airline");
+				airline = getAirline(temp);
 				flightnr = rs1.getString("flightnr");
 				
-				list.add(airline + " " + flightnr 
-						+ " - Departure: " + airports[0] + " " + convertDate(rs1.getString("departure_time")) + " - "
-						+ " - Destination: " + airports[1] + " " + convertDate(rs1.getString("destination_time")));
+				list.add(airline + " NR: " + flightnr 
+						+ " - DEP: " + airports[0] + " " + convertDate(rs1.getString("departure_time"))
+						+ " --- DES: " + airports[1] + " " + convertDate(rs1.getString("destination_time")));
 			}
 			
 			
@@ -478,8 +513,11 @@ public class MainWindow {
 	
 	/*
 	 * This function returns a specific date-part
+	 * 
+	 * @param date The date that will be converted from YYYY-MM-DD HH:MM:SS to DD.MM.YYYY HH:MM
 	 */
 	public static String convertDate(String date){
+		// Splits the string at - OR [whitespace] OR :
 		String[] split = date.split("-| |:");
 		return split[2] + "." + split[1] + "." + split[0] + " " + split[3] + ":" + split[4];
 	}
